@@ -80,9 +80,7 @@ const Signup = () => {
             <div className="w-full max-w-2xl">
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-block">
-                        <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mx-auto mb-4">
-                            <Music className="w-6 h-6 text-white" />
-                        </div>
+                        <img src="/src/assets/logo.jpg" alt="Mziki City Logo" className="w-12 h-12 rounded-xl object-cover mx-auto mb-4" />
                     </Link>
                     <h1 className="text-3xl font-bold text-white mb-2">Create your account</h1>
                     <p className="text-gray-400">Join thousands of independent artists</p>

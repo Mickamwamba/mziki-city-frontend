@@ -73,10 +73,8 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
                         <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                                <Music className="w-5 h-5 text-white" />
-                            </div>
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Music360</span>
+                            <img src="/src/assets/logo.jpg" alt="Mziki City Logo" className="w-8 h-8 rounded-lg object-cover" />
+                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Mziki City</span>
                         </div>
                         <div className="flex items-center space-x-6">
                             <Link to="/pricing" className="text-gray-300 hover:text-white font-medium transition-colors">Pricing</Link>
@@ -183,10 +181,10 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
                     <div className="flex items-center space-x-2 mb-4 md:mb-0">
                         <Music className="w-6 h-6 text-gray-600" />
-                        <span className="text-lg font-bold text-gray-500">Music360</span>
+                        <span className="text-lg font-bold text-gray-500">Mziki City</span>
                     </div>
                     <div className="text-gray-600 text-sm">
-                        &copy; {new Date().getFullYear()} Music360. All rights reserved.
+                        &copy; {new Date().getFullYear()} Mziki City. All rights reserved.
                     </div>
                 </div>
             </footer>

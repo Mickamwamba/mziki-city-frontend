@@ -28,11 +28,9 @@ const Layout = ({ children }) => {
             {/* Sidebar */}
             <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
                 <div className="p-6 flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                        <Music className="w-5 h-5 text-white" />
-                    </div>
+                    <img src="/src/assets/logo.jpg" alt="Mziki City Logo" className="w-8 h-8 rounded-lg object-cover" />
                     <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                        Music360
+                        Mziki City
                     </span>
                 </div>
 
