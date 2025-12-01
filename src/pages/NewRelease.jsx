@@ -17,6 +17,9 @@ const NewRelease = () => {
     const [selectedItem, setSelectedItem] = useState(null); // Song or Album object
     const [albumTracks, setAlbumTracks] = useState([]);
     const [platformIds, setPlatformIds] = useState([]);
+    const [splits, setSplits] = useState([
+        { recipient: 'Me (Primary Artist)', role: 'Artist', percentage: 100 }
+    ]);
 
     useEffect(() => {
         fetchInitialData();
@@ -116,14 +119,6 @@ const NewRelease = () => {
                 await api.patch(`music/songs/${selectedItem.id}/`, songData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
-
-                // 2. Distribute
-                if (platformIds.length > 0) {
-                    await api.post('distribution/requests/distribute_song/', {
-                        song_id: selectedItem.id,
-                        platform_ids: platformIds
-                    });
-                }
             } else {
                 // 1. Update Album to is_released=True
                 const albumData = new FormData();
@@ -132,34 +127,38 @@ const NewRelease = () => {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
-                // 2. Distribute all songs
+                // 2. Update all tracks
                 for (const track of albumTracks) {
-                    // Update track to is_released=True as well
                     const trackData = new FormData();
                     trackData.append('is_released', 'true');
                     await api.patch(`music/songs/${track.id}/`, trackData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
-
-                    if (platformIds.length > 0) {
-                        await api.post('distribution/requests/distribute_song/', {
-                            song_id: track.id,
-                            platform_ids: platformIds
-                        });
-                    }
                 }
             }
 
-            // 3. Save Splits
+            // 3. Prepare Splits
             const splitsData = splits.map(s => ({
                 ...s,
                 song: releaseType === 'single' ? selectedItem.id : null,
                 album: releaseType === 'album' ? selectedItem.id : null
             }));
 
-            await api.post('distribution/splits/set_splits/', { splits: splitsData });
+            // 4. Create Release Request
+            const payload = {
+                platform_ids: platformIds,
+                splits: splitsData
+            };
 
-            navigate('/dashboard');
+            if (releaseType === 'single') {
+                payload.song_id = selectedItem.id;
+            } else {
+                payload.album_id = selectedItem.id;
+            }
+
+            await api.post('distribution/release-requests/create_release/', payload);
+
+            navigate('/release-requests');
         } catch (error) {
             console.error('Release failed:', error);
             alert('Release failed. Please try again.');
@@ -167,12 +166,6 @@ const NewRelease = () => {
             setLoading(false);
         }
     };
-
-    const [splits, setSplits] = useState([
-        { recipient: 'Me (Primary Artist)', role: 'Artist', percentage: 100 }
-    ]);
-
-    // ... existing code ...
 
     const addSplit = () => {
         setSplits([...splits, { recipient: '', role: 'Producer', percentage: 0 }]);
@@ -191,8 +184,6 @@ const NewRelease = () => {
     };
 
     const totalPercentage = splits.reduce((sum, split) => sum + Number(split.percentage), 0);
-
-    // --- Steps ---
     const getSteps = () => {
         return [
             { id: 1, label: 'Review', icon: CheckCircle },

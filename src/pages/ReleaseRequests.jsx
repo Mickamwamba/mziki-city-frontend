@@ -14,8 +14,7 @@ const ReleaseRequests = () => {
 
     const fetchReleases = async () => {
         try {
-            // Fetch songs that are not in draft (i.e., have been requested)
-            const res = await api.get('music/songs/?statuses=pending,approved,released,rejected');
+            const res = await api.get('distribution/release-requests/');
             setReleases(res.data);
         } catch (error) {
             console.error('Error fetching releases:', error);
@@ -26,6 +25,8 @@ const ReleaseRequests = () => {
 
     const getStatusBadge = (status) => {
         switch (status) {
+            case 'draft':
+                return <span className="bg-gray-500/10 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">Draft</span>;
             case 'pending':
                 return <span className="bg-yellow-500/10 text-yellow-500 px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1"><Clock className="w-3 h-3" /><span>Pending Review</span></span>;
             case 'approved':
@@ -35,7 +36,7 @@ const ReleaseRequests = () => {
             case 'rejected':
                 return <span className="bg-red-500/10 text-red-500 px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1"><XCircle className="w-3 h-3" /><span>Rejected</span></span>;
             default:
-                return <span className="bg-gray-500/10 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">Draft</span>;
+                return <span className="bg-gray-500/10 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">{status}</span>;
         }
     };
 
@@ -59,39 +60,45 @@ const ReleaseRequests = () => {
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden backdrop-blur-sm">
                 {releases.length > 0 ? (
                     <div className="divide-y divide-slate-800">
-                        {releases.map(release => (
-                            <div
-                                key={release.id}
-                                onClick={() => navigate(`/release-requests/${release.id}`)}
-                                className="p-4 hover:bg-slate-800/50 transition-colors cursor-pointer flex items-center justify-between group"
-                            >
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-16 h-16 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0">
-                                        {release.cover_art ? (
-                                            <img src={release.cover_art} alt={release.title} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <Music className="w-full h-full p-4 text-slate-600" />
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">{release.title}</h3>
-                                        <div className="flex items-center space-x-3 text-sm text-gray-400 mt-1">
-                                            <span>{release.genre}</span>
-                                            <span>•</span>
-                                            <span className="flex items-center space-x-1">
-                                                <Calendar className="w-3 h-3" />
-                                                <span>{new Date(release.created_at).toLocaleDateString()}</span>
-                                            </span>
+                        {releases.map(release => {
+                            // Get details from first content item (song/album)
+                            const content = release.contents?.[0];
+                            const details = content?.song_details || content?.album_details || {};
+
+                            return (
+                                <div
+                                    key={release.id}
+                                    onClick={() => navigate(`/release-requests/${release.id}`)}
+                                    className="p-4 hover:bg-slate-800/50 transition-colors cursor-pointer flex items-center justify-between group"
+                                >
+                                    <div className="flex items-center space-x-4">
+                                        <div className="w-16 h-16 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0">
+                                            {details.cover_art ? (
+                                                <img src={details.cover_art} alt={release.title} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <Music className="w-full h-full p-4 text-slate-600" />
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">{release.title}</h3>
+                                            <div className="flex items-center space-x-3 text-sm text-gray-400 mt-1">
+                                                <span>{details.genre || 'Music'}</span>
+                                                <span>•</span>
+                                                <span className="flex items-center space-x-1">
+                                                    <Calendar className="w-3 h-3" />
+                                                    <span>{new Date(release.created_at).toLocaleDateString()}</span>
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="flex items-center space-x-6">
-                                    {getStatusBadge(release.release_status)}
-                                    <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
+                                    <div className="flex items-center space-x-6">
+                                        {getStatusBadge(release.status)}
+                                        <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="text-center py-16">

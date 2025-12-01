@@ -17,14 +17,24 @@ const ReleaseRequestDetails = () => {
 
     const fetchDetails = async () => {
         try {
-            const [songRes, distRes, splitsRes] = await Promise.all([
-                api.get(`music/songs/${id}/`),
-                api.get(`distribution/requests/?song=${id}`), // Assuming we have this endpoint or similar filtering
-                api.get(`distribution/splits/?song=${id}`)
-            ]);
-            setRelease(songRes.data);
-            setDistributions(distRes.data); // This might need adjustment if endpoint returns paginated
-            setSplits(splitsRes.data);
+            const releaseRes = await api.get(`distribution/release-requests/${id}/`);
+            const releaseData = releaseRes.data;
+            setRelease(releaseData);
+
+            // Fetch splits based on content
+            if (releaseData.contents?.length > 0) {
+                const content = releaseData.contents[0];
+                let splitsRes;
+                if (content.song) {
+                    splitsRes = await api.get(`distribution/splits/?song=${content.song}`);
+                } else if (content.album) {
+                    splitsRes = await api.get(`distribution/splits/?album=${content.album}`);
+                }
+
+                if (splitsRes) {
+                    setSplits(splitsRes.data);
+                }
+            }
         } catch (error) {
             console.error('Error fetching details:', error);
         } finally {
@@ -43,12 +53,19 @@ const ReleaseRequestDetails = () => {
             case 'rejected':
                 return <div className="bg-red-500/10 text-red-500 px-4 py-2 rounded-full font-bold flex items-center space-x-2"><XCircle className="w-5 h-5" /><span>Rejected</span></div>;
             default:
-                return <div className="bg-gray-500/10 text-gray-500 px-4 py-2 rounded-full font-bold">Draft</div>;
+                return <div className="bg-gray-500/10 text-gray-500 px-4 py-2 rounded-full font-bold">{status || 'Draft'}</div>;
         }
     };
 
     if (loading) return <div className="flex justify-center items-center h-screen"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
     if (!release) return <div className="text-white text-center mt-20">Release not found</div>;
+
+    // Helper to get display details
+    const content = release.contents?.[0];
+    const details = content?.song_details || content?.album_details || {};
+    const coverArt = details.cover_art;
+    const genre = details.genre || 'Music';
+    const artistName = release.artist_name || details.artist_name || 'Artist'; // release.artist is ID, need name from somewhere or just use details
 
     return (
         <div className="max-w-4xl mx-auto pb-20">
@@ -62,8 +79,8 @@ const ReleaseRequestDetails = () => {
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="flex items-center space-x-6">
                         <div className="w-24 h-24 bg-slate-800 rounded-xl overflow-hidden shadow-lg flex-shrink-0">
-                            {release.cover_art ? (
-                                <img src={release.cover_art} alt={release.title} className="w-full h-full object-cover" />
+                            {coverArt ? (
+                                <img src={coverArt} alt={release.title} className="w-full h-full object-cover" />
                             ) : (
                                 <Music className="w-full h-full p-6 text-slate-600" />
                             )}
@@ -71,15 +88,15 @@ const ReleaseRequestDetails = () => {
                         <div>
                             <h1 className="text-3xl font-bold text-white mb-2">{release.title}</h1>
                             <div className="flex items-center space-x-3 text-gray-400">
-                                <span>{release.artist_name}</span>
+                                <span>{artistName}</span>
                                 <span>•</span>
-                                <span>{release.genre}</span>
+                                <span>{genre}</span>
                                 <span>•</span>
                                 <span>{new Date(release.created_at).toLocaleDateString()}</span>
                             </div>
                         </div>
                     </div>
-                    {getStatusBadge(release.release_status)}
+                    {getStatusBadge(release.status)}
                 </div>
             </div>
 
@@ -91,16 +108,15 @@ const ReleaseRequestDetails = () => {
                         <span>Platform Status</span>
                     </h2>
                     <div className="space-y-4">
-                        {distributions.length > 0 ? (
-                            distributions.map(dist => (
+                        {release.platform_statuses?.length > 0 ? (
+                            release.platform_statuses.map(dist => (
                                 <div key={dist.id} className="flex items-center justify-between p-3 bg-slate-900 rounded-xl border border-slate-800">
                                     <div className="flex items-center space-x-3">
-                                        {/* Assuming dist.platform_details or similar is populated, otherwise just name */}
                                         <span className="font-medium text-white">{dist.platform_details?.name || `Platform #${dist.platform}`}</span>
                                     </div>
                                     <span className={`text-xs font-bold px-2 py-1 rounded uppercase ${dist.status === 'distributed' ? 'bg-green-500/20 text-green-500' :
-                                            dist.status === 'failed' ? 'bg-red-500/20 text-red-500' :
-                                                'bg-yellow-500/20 text-yellow-500'
+                                        dist.status === 'failed' ? 'bg-red-500/20 text-red-500' :
+                                            'bg-yellow-500/20 text-yellow-500'
                                         }`}>
                                         {dist.status}
                                     </span>
