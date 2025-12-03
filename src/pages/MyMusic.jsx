@@ -1,20 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
-import { Play, Calendar, BarChart2, CheckCircle, Upload } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Play, Calendar, BarChart2, CheckCircle, Upload, Filter, Search } from 'lucide-react';
 
 const MyMusic = () => {
+    const { user } = useAuth();
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('released');
+    const [managedArtists, setManagedArtists] = useState([]);
+    const [selectedArtistId, setSelectedArtistId] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        fetchSongs();
-    }, []);
+        if (user?.is_label) {
+            fetchManagedArtists();
+        }
+    }, [user]);
 
-    const fetchSongs = async () => {
+    useEffect(() => {
+        fetchSongs(selectedArtistId);
+    }, [selectedArtistId]);
+
+    const fetchManagedArtists = async () => {
         try {
-            const response = await api.get('music/songs/');
+            const response = await api.get('users/managed-artists/');
+            setManagedArtists(response.data);
+        } catch (error) {
+            console.error('Error fetching managed artists:', error);
+        }
+    };
+
+    const fetchSongs = async (artistId = '') => {
+        setLoading(true);
+        try {
+            let url = 'music/songs/';
+            if (artistId) {
+                url += `?artist_id=${artistId}`;
+            }
+            const response = await api.get(url);
             setSongs(response.data);
         } catch (error) {
             console.error('Error fetching songs:', error);
@@ -23,21 +48,56 @@ const MyMusic = () => {
         }
     };
 
-    const filteredSongs = songs.filter(song =>
-        activeTab === 'released' ? song.is_released : !song.is_released
-    );
+    const handleArtistChange = (e) => {
+        setSelectedArtistId(e.target.value);
+    };
+
+    const filteredSongs = songs.filter(song => {
+        const matchesTab = activeTab === 'released' ? song.is_released : !song.is_released;
+        const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesTab && matchesSearch;
+    });
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2">My Music</h1>
                     <p className="text-gray-400">Manage your catalog and releases</p>
                 </div>
-                <Link to="/upload" className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2">
-                    <Upload className="w-5 h-5" />
-                    <span>Upload Music</span>
-                </Link>
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Search songs..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-primary w-48 md:w-64"
+                        />
+                    </div>
+                    {user?.is_label && (
+                        <div className="relative">
+                            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <select
+                                value={selectedArtistId}
+                                onChange={handleArtistChange}
+                                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                            >
+                                <option value="">All Artists</option>
+                                {managedArtists.map(artist => (
+                                    <option key={artist.id} value={artist.id}>
+                                        {artist.artist_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                    <Link to="/upload" className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2">
+                        <Upload className="w-5 h-5" />
+                        <span>Upload Music</span>
+                    </Link>
+                </div>
             </div>
 
             <div className="flex space-x-6 border-b border-slate-800 mb-8">

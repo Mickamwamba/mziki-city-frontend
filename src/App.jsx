@@ -18,6 +18,8 @@ import NewRelease from './pages/NewRelease';
 import Marketplace from './pages/Marketplace';
 import ReleaseRequests from './pages/ReleaseRequests';
 import ReleaseRequestDetails from './pages/ReleaseRequestDetails';
+import Artists from './pages/Artists';
+import ArtistDetails from './pages/ArtistDetails';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -105,6 +107,18 @@ const App = () => {
       <Route path="/analytics" element={
         <PrivateRoute>
           <Analytics />
+        </PrivateRoute>
+      } />
+
+      <Route path="/artists" element={
+        <PrivateRoute>
+          <Artists />
+        </PrivateRoute>
+      } />
+
+      <Route path="/artists/:id" element={
+        <PrivateRoute>
+          <ArtistDetails />
         </PrivateRoute>
       } />
     </Routes>

@@ -12,12 +12,10 @@ const Signup = () => {
         email: '',
         password: '',
         confirm_password: '',
-        username: '', // We'll generate this or ask for it? Let's auto-generate or use email prefix for now, or ask. User didn't specify. Let's ask for it as it's required by Django User model usually, or we can hide it.
-        // Wait, user request didn't mention username. But Django User model needs it. I'll add it or derive it.
-        // Let's add it to be safe, or just use email as username.
-        // Actually, let's keep it simple and ask for it, or just use email as username.
-        // The prompt says "User will sign in with email and password".
-        // I'll hide username and set it to email.
+        username: '',
+        is_label: false,
+        is_artist: true,
+        label_name: '',
     });
     const [termsAgreed, setTermsAgreed] = useState(false);
     const [error, setError] = useState('');
@@ -119,13 +117,37 @@ const Signup = () => {
                             </div>
                         </div>
 
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-400 mb-2">I am signing up as a...</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, is_label: false, is_artist: true })}
+                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center transition-all ${!formData.is_label ? 'bg-primary/20 border-primary text-white' : 'bg-slate-800 border-slate-700 text-gray-400 hover:bg-slate-750'}`}
+                                >
+                                    <Music className="w-6 h-6 mb-2" />
+                                    <span className="font-bold">Artist</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, is_label: true, is_artist: false })}
+                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center transition-all ${formData.is_label ? 'bg-primary/20 border-primary text-white' : 'bg-slate-800 border-slate-700 text-gray-400 hover:bg-slate-750'}`}
+                                >
+                                    <div className="w-6 h-6 mb-2 flex items-center justify-center font-bold border-2 border-current rounded-md text-xs">LB</div>
+                                    <span className="font-bold">Label</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-2">Artist Name</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-2">
+                                    {formData.is_label ? 'Label Name' : 'Artist Name'}
+                                </label>
                                 <input
                                     type="text"
-                                    name="artist_name"
-                                    value={formData.artist_name}
+                                    name={formData.is_label ? 'label_name' : 'artist_name'}
+                                    value={formData.is_label ? formData.label_name : formData.artist_name}
                                     onChange={handleChange}
                                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     required

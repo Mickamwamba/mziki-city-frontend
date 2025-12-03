@@ -1,22 +1,51 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
-import { DollarSign, PlayCircle, TrendingUp, Music, ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { DollarSign, PlayCircle, TrendingUp, Music, ArrowRight, Users, Filter } from 'lucide-react';
 
 const Dashboard = () => {
+    const { user } = useAuth();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [hasSongs, setHasSongs] = useState(false);
+    const [managedArtists, setManagedArtists] = useState([]);
+    const [selectedArtistId, setSelectedArtistId] = useState('');
 
     useEffect(() => {
-        fetchDashboardData();
-    }, []);
+        if (user?.is_label) {
+            fetchManagedArtists();
+        }
+    }, [user]);
 
-    const fetchDashboardData = async () => {
+    useEffect(() => {
+        fetchDashboardData(selectedArtistId);
+    }, [selectedArtistId]);
+
+    const fetchManagedArtists = async () => {
         try {
+            const response = await api.get('users/managed-artists/');
+            setManagedArtists(response.data);
+        } catch (error) {
+            console.error('Error fetching managed artists:', error);
+        }
+    };
+
+    const fetchDashboardData = async (artistId = '') => {
+        setLoading(true);
+        try {
+            let analyticsUrl = 'analytics/dashboard/';
+            let songsUrl = 'music/songs/';
+
+            if (artistId) {
+                analyticsUrl += `?artist_id=${artistId}`;
+                songsUrl += `?artist_id=${artistId}`;
+            }
+
             const [analyticsRes, songsRes] = await Promise.all([
-                api.get('analytics/dashboard/'),
-                api.get('music/songs/')
+                api.get(analyticsUrl),
+                api.get(songsUrl)
             ]);
             setData(analyticsRes.data);
             setHasSongs(songsRes.data.length > 0);
@@ -27,38 +56,42 @@ const Dashboard = () => {
         }
     };
 
+    const handleArtistChange = (e) => {
+        setSelectedArtistId(e.target.value);
+    };
+
     const handleExport = () => {
         if (!data) return;
 
         const date = new Date().toLocaleDateString();
-        let csvContent = `Mziki City Analytics Report - ${date}\n\n`;
+        let csvContent = `Mziki City Analytics Report - ${date} \n\n`;
 
         // Section 1: Summary
         csvContent += `SUMMARY\n`;
-        csvContent += `Total Streams,${data.total_streams}\n`;
-        csvContent += `Total Revenue,$${data.total_revenue.toFixed(2)}\n\n`;
+        csvContent += `Total Streams, ${data.total_streams} \n`;
+        csvContent += `Total Revenue, $${data.total_revenue.toFixed(2)} \n\n`;
 
         // Section 2: Streams by Platform
         csvContent += `STREAMS BY PLATFORM\n`;
-        csvContent += `Platform,Streams\n`;
+        csvContent += `Platform, Streams\n`;
         data.platform_streams.forEach(item => {
-            csvContent += `${item.platform__name},${item.total}\n`;
+            csvContent += `${item.platform__name},${item.total} \n`;
         });
         csvContent += `\n`;
 
         // Section 3: Revenue by Platform
         csvContent += `REVENUE BY PLATFORM\n`;
-        csvContent += `Platform,Revenue\n`;
+        csvContent += `Platform, Revenue\n`;
         data.platform_revenue.forEach(item => {
-            csvContent += `${item.platform__name},$${item.total.toFixed(2)}\n`;
+            csvContent += `${item.platform__name},$${item.total.toFixed(2)} \n`;
         });
         csvContent += `\n`;
 
         // Section 4: Recent Activity
-        csvContent += `TOP PERFORMING SONGS (RECENT)\n`;
-        csvContent += `Song,Platform,Date,Streams\n`;
+        csvContent += `TOP PERFORMING SONGS(RECENT) \n`;
+        csvContent += `Song, Platform, Date, Streams\n`;
         data.recent_streams.forEach(item => {
-            csvContent += `${item.song_title},${item.platform_name},${item.date},${item.count}\n`;
+            csvContent += `${item.song_title},${item.platform_name},${item.date},${item.count} \n`;
         });
 
         // Download
@@ -73,35 +106,59 @@ const Dashboard = () => {
         document.body.removeChild(link);
     };
 
-    if (loading) return <div className="text-center py-12 text-gray-400">Loading dashboard...</div>;
+    if (loading && !data) return <div className="text-center py-12 text-gray-400">Loading dashboard...</div>;
 
     return (
         <div>
-            <div className="mb-8 flex items-center justify-between">
+            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
                     <p className="text-gray-400">Overview of your music performance</p>
                 </div>
-                <div className="flex space-x-4">
+                <div className="flex flex-wrap items-center gap-4">
+                    {user?.is_label && (
+                        <div className="relative">
+                            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <select
+                                value={selectedArtistId}
+                                onChange={handleArtistChange}
+                                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                            >
+                                <option value="">All Artists</option>
+                                {managedArtists.map(artist => (
+                                    <option key={artist.id} value={artist.id}>
+                                        {artist.artist_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     {hasSongs && (
                         <button
                             onClick={handleExport}
                             className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2 border border-slate-700"
                         >
-                            <ArrowRight className="w-4 h-4 rotate-45" /> {/* Using ArrowRight as a makeshift export icon if Download isn't available, or just text */}
+                            <ArrowRight className="w-4 h-4 rotate-45" />
                             <span>Export Report</span>
                         </button>
                     )}
-                    {!hasSongs && (
+                    {!hasSongs && !user?.is_label && (
                         <Link to="/upload" className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2">
                             <Music className="w-5 h-5" />
                             <span>Upload First Song</span>
                         </Link>
                     )}
+                    {!hasSongs && user?.is_label && (
+                        <Link to="/upload" className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2">
+                            <Music className="w-5 h-5" />
+                            <span>Upload Song for Artist</span>
+                        </Link>
+                    )}
                 </div>
             </div>
 
-            {!hasSongs ? (
+            {!hasSongs && !selectedArtistId ? (
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center">
                     <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-6">
                         <Music className="w-10 h-10 text-white" />
@@ -164,7 +221,7 @@ const Dashboard = () => {
                                         <div className="flex-1 mx-4 h-2 bg-slate-800 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-blue-500"
-                                                style={{ width: `${(item.total / data.total_streams) * 100}%` }}
+                                                style={{ width: `${(item.total / data.total_streams) * 100}% ` }}
                                             />
                                         </div>
                                         <span className="text-white font-medium">{item.total.toLocaleString()}</span>
@@ -191,7 +248,7 @@ const Dashboard = () => {
                                         <div className="flex-1 mx-4 h-2 bg-slate-800 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-green-500"
-                                                style={{ width: `${(item.total / data.total_revenue) * 100}%` }}
+                                                style={{ width: `${(item.total / data.total_revenue) * 100}% ` }}
                                             />
                                         </div>
                                         <span className="text-white font-medium">${item.total.toFixed(2)}</span>

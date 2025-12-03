@@ -1,22 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
-import { Disc, Plus, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Disc, Plus, Calendar, CheckCircle, Clock, Filter, Search } from 'lucide-react';
 
 const Albums = () => {
+    const { user } = useAuth();
     const [albums, setAlbums] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [newAlbum, setNewAlbum] = useState({ title: '', release_date: '', cover_art: null });
+    const [newAlbum, setNewAlbum] = useState({ title: '', release_date: '', cover_art: null, artist_id: '' });
     const [activeTab, setActiveTab] = useState('released');
+    const [managedArtists, setManagedArtists] = useState([]);
+    const [selectedArtistId, setSelectedArtistId] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        fetchAlbums();
-    }, []);
+        if (user?.is_label) {
+            fetchManagedArtists();
+        }
+    }, [user]);
 
-    const fetchAlbums = async () => {
+    useEffect(() => {
+        fetchAlbums(selectedArtistId);
+    }, [selectedArtistId]);
+
+    const fetchManagedArtists = async () => {
         try {
-            const response = await api.get('music/albums/');
+            const response = await api.get('users/managed-artists/');
+            setManagedArtists(response.data);
+        } catch (error) {
+            console.error('Error fetching managed artists:', error);
+        }
+    };
+
+    const fetchAlbums = async (artistId = '') => {
+        setLoading(true);
+        try {
+            let url = 'music/albums/';
+            if (artistId) {
+                url += `?artist_id=${artistId}`;
+            }
+            const response = await api.get(url);
             setAlbums(response.data);
         } catch (error) {
             console.error('Error fetching albums:', error);
@@ -34,36 +59,74 @@ const Albums = () => {
             if (newAlbum.cover_art) {
                 formData.append('cover_art', newAlbum.cover_art);
             }
+            if (newAlbum.artist_id) {
+                formData.append('artist_id', newAlbum.artist_id);
+            }
 
             await api.post('music/albums/', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setShowModal(false);
-            setNewAlbum({ title: '', release_date: '', cover_art: null });
-            fetchAlbums();
+            setNewAlbum({ title: '', release_date: '', cover_art: null, artist_id: '' });
+            fetchAlbums(selectedArtistId);
         } catch (error) {
             console.error('Error creating album:', error);
         }
     };
 
-    const filteredAlbums = albums.filter(album =>
-        activeTab === 'released' ? album.is_released : !album.is_released
-    );
+    const handleArtistChange = (e) => {
+        setSelectedArtistId(e.target.value);
+    };
+
+    const filteredAlbums = albums.filter(album => {
+        const matchesTab = activeTab === 'released' ? album.is_released : !album.is_released;
+        const matchesSearch = album.title.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesTab && matchesSearch;
+    });
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2">Albums & EPs</h1>
                     <p className="text-gray-400">Manage your collections</p>
                 </div>
-                <button
-                    onClick={() => setShowModal(true)}
-                    className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2"
-                >
-                    <Plus className="w-5 h-5" />
-                    <span>New Album</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Search albums..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-primary w-48 md:w-64"
+                        />
+                    </div>
+                    {user?.is_label && (
+                        <div className="relative">
+                            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <select
+                                value={selectedArtistId}
+                                onChange={handleArtistChange}
+                                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                            >
+                                <option value="">All Artists</option>
+                                {managedArtists.map(artist => (
+                                    <option key={artist.id} value={artist.id}>
+                                        {artist.artist_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2"
+                    >
+                        <Plus className="w-5 h-5" />
+                        <span>New Album</span>
+                    </button>
+                </div>
             </div>
 
             <div className="flex space-x-6 border-b border-slate-800 mb-8">
@@ -132,6 +195,24 @@ const Albums = () => {
                     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 w-full max-w-md">
                         <h2 className="text-2xl font-bold text-white mb-6">Create New Album</h2>
                         <form onSubmit={handleCreateAlbum} className="space-y-4">
+                            {user?.is_label && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">Artist *</label>
+                                    <select
+                                        value={newAlbum.artist_id}
+                                        onChange={(e) => setNewAlbum({ ...newAlbum, artist_id: e.target.value })}
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                        required
+                                    >
+                                        <option value="">Select Artist...</option>
+                                        {managedArtists.map(artist => (
+                                            <option key={artist.id} value={artist.id}>
+                                                {artist.artist_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-sm font-medium text-gray-400 mb-2">Album Title</label>
                                 <input

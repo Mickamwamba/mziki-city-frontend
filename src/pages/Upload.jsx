@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api';
+import { useAuth } from '../context/AuthContext';
 import { Upload as UploadIcon, Loader2, CheckCircle, Music, Disc, ArrowRight, ArrowLeft, Info, Users, Copyright, Settings } from 'lucide-react';
 
 const Upload = () => {
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [albums, setAlbums] = useState([]);
+    const [managedArtists, setManagedArtists] = useState([]);
 
     const [formData, setFormData] = useState({
         // Release Info
@@ -21,6 +24,7 @@ const Upload = () => {
         catalog_number: '',
         label_name: '',
         album: '', // Optional album link
+        artist_id: '', // For labels
 
         // Credits
         primary_artist_name: '',
@@ -45,12 +49,17 @@ const Upload = () => {
 
     useEffect(() => {
         fetchInitialData();
-    }, []);
+    }, [user]);
 
     const fetchInitialData = async () => {
         try {
             const albumsRes = await api.get('music/albums/');
             setAlbums(albumsRes.data);
+
+            if (user?.is_label) {
+                const artistsRes = await api.get('users/managed-artists/');
+                setManagedArtists(artistsRes.data);
+            }
 
             // Parse Query Params
             const editMode = searchParams.get('edit') === 'true';
@@ -70,6 +79,7 @@ const Upload = () => {
                     catalog_number: song.catalog_number || '',
                     label_name: song.label_name || '',
                     album: song.album || '',
+                    artist_id: song.artist || '',
                     primary_artist_name: song.primary_artist_name || '',
                     featured_artists: song.featured_artists || '',
                     producer: song.producer || '',
@@ -106,7 +116,6 @@ const Upload = () => {
         setLoading(true);
         try {
             const songData = new FormData();
-            // Append all fields
             // Append all fields
             Object.keys(formData).forEach(key => {
                 // Append if not null. We want to send empty strings to clear fields or set them to empty.
@@ -156,6 +165,25 @@ const Upload = () => {
         <div className="space-y-6">
             <h2 className="text-xl font-bold text-white mb-4">Song Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {user?.is_label && (
+                    <div className="col-span-2">
+                        <label className="block text-sm font-medium text-gray-400 mb-2">Artist *</label>
+                        <select
+                            name="artist_id"
+                            value={formData.artist_id}
+                            onChange={handleChange}
+                            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                            required
+                        >
+                            <option value="">Select Artist...</option>
+                            {managedArtists.map(artist => (
+                                <option key={artist.id} value={artist.id}>
+                                    {artist.artist_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
                 <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-400 mb-2">Song Title *</label>
                     <input type="text" name="title" value={formData.title} onChange={handleChange} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white" placeholder="e.g. Summer Vibes" required />

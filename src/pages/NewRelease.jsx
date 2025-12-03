@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import { Upload as UploadIcon, Loader2, CheckCircle, Music, Disc, Globe, ArrowRight, ArrowLeft, Settings, ListMusic, Plus, Trash2, AlertTriangle } from 'lucide-react';
 
@@ -11,6 +12,10 @@ const NewRelease = () => {
     const [albums, setAlbums] = useState([]);
     const [songs, setSongs] = useState([]);
     const [platforms, setPlatforms] = useState([]);
+
+    const [managedArtists, setManagedArtists] = useState([]);
+    const [selectedArtistId, setSelectedArtistId] = useState(null);
+    const { user } = useAuth(); // Assuming useAuth provides user object
 
     // Release State
     const [releaseType, setReleaseType] = useState(null); // 'single' | 'album'
@@ -27,16 +32,31 @@ const NewRelease = () => {
 
     const fetchInitialData = async () => {
         try {
-            const [albumsRes, songsRes, platformsRes, subsRes] = await Promise.all([
+            const promises = [
                 api.get('music/albums/'),
                 api.get('music/songs/'),
                 api.get('distribution/platforms/'),
                 api.get('investments/subscriptions/active/')
-            ]);
+            ];
+
+            if (user?.is_label) {
+                promises.push(api.get('managed-artists/'));
+            }
+
+            const results = await Promise.all(promises);
+            const albumsRes = results[0];
+            const songsRes = results[1];
+            const platformsRes = results[2];
+            const subsRes = results[3];
+
             setAlbums(albumsRes.data);
             setSongs(songsRes.data);
             setPlatforms(platformsRes.data);
             setPlatformIds(platformsRes.data.map(p => p.id));
+
+            if (user?.is_label && results[4]) {
+                setManagedArtists(results[4].data);
+            }
 
             // Initialize splits with subscriptions
             const activeSubs = subsRes.data;
@@ -154,6 +174,10 @@ const NewRelease = () => {
                 payload.song_id = selectedItem.id;
             } else {
                 payload.album_id = selectedItem.id;
+            }
+
+            if (user?.is_label && selectedArtistId) {
+                payload.artist_id = selectedArtistId;
             }
 
             await api.post('distribution/release-requests/create_release/', payload);
@@ -379,12 +403,38 @@ const NewRelease = () => {
 
     // --- Step 0: Selection ---
     if (step === 0) {
-        const unreleasedSongs = songs.filter(s => !s.is_released && !s.album); // Only singles (no album assigned)
-        const unreleasedAlbums = albums.filter(a => !a.is_released);
+        let filteredSongs = songs.filter(s => !s.is_released && !s.album);
+        let filteredAlbums = albums.filter(a => !a.is_released);
+
+        if (user?.is_label && selectedArtistId) {
+            filteredSongs = filteredSongs.filter(s => s.artist === selectedArtistId);
+            filteredAlbums = filteredAlbums.filter(a => a.artist === selectedArtistId);
+        } else if (user?.is_label && !selectedArtistId) {
+            // If label hasn't selected an artist, maybe show nothing or all?
+            // Let's show nothing until they select
+            filteredSongs = [];
+            filteredAlbums = [];
+        }
 
         return (
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-3xl font-bold text-white mb-8 text-center">New Release</h1>
+
+                {user?.is_label && (
+                    <div className="mb-8">
+                        <label className="block text-sm font-medium text-gray-400 mb-2">Select Artist</label>
+                        <select
+                            value={selectedArtistId || ''}
+                            onChange={(e) => setSelectedArtistId(parseInt(e.target.value))}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        >
+                            <option value="">-- Select an Artist --</option>
+                            {managedArtists.map(artist => (
+                                <option key={artist.id} value={artist.id}>{artist.artist_name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                     {/* Single Selection */}
@@ -400,8 +450,8 @@ const NewRelease = () => {
                         </div>
 
                         <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                            {unreleasedSongs.length > 0 ? (
-                                unreleasedSongs.map(song => (
+                            {filteredSongs.length > 0 ? (
+                                filteredSongs.map(song => (
                                     <div
                                         key={song.id}
                                         onClick={() => handleSelectSong(song)}
@@ -438,8 +488,8 @@ const NewRelease = () => {
                         </div>
 
                         <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                            {unreleasedAlbums.length > 0 ? (
-                                unreleasedAlbums.map(album => (
+                            {filteredAlbums.length > 0 ? (
+                                filteredAlbums.map(album => (
                                     <div
                                         key={album.id}
                                         onClick={() => handleSelectAlbum(album)}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Music, Upload, LogOut, Disc, Menu, X, TrendingUp, BarChart3, DollarSign, Clock } from 'lucide-react';
+import { LayoutDashboard, Music, Upload, LogOut, Disc, Menu, X, TrendingUp, BarChart3, DollarSign, Clock, Users } from 'lucide-react';
 
 const Layout = ({ children }) => {
     const { user, logout } = useAuth();
@@ -15,8 +15,14 @@ const Layout = ({ children }) => {
 
     const navItems = [
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/my-music', label: 'My Music', icon: Music },
-        { path: '/albums', label: 'Albums', icon: Disc },
+        ...(user?.is_label ? [
+            { path: '/artists', label: 'Artists', icon: Users },
+            { path: '/my-music', label: 'Songs', icon: Music },
+            { path: '/albums', label: 'Albums', icon: Disc },
+        ] : [
+            { path: '/my-music', label: 'My Music', icon: Music },
+            { path: '/albums', label: 'Albums', icon: Disc },
+        ]),
         { path: '/release-requests', label: 'Release Requests', icon: Clock },
         { icon: TrendingUp, label: 'Marketplace', path: '/marketplace' },
         { path: '/analytics', label: 'Analytics', icon: BarChart3 },
@@ -60,8 +66,12 @@ const Layout = ({ children }) => {
                             {user?.username?.[0]?.toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{user?.artist_name || user?.username}</p>
-                            <p className="text-xs text-gray-500 truncate">Artist</p>
+                            <p className="text-sm font-medium truncate">
+                                {user?.is_label ? (user?.label_name || user?.username) : (user?.artist_name || user?.username)}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                                {user?.is_label ? 'Label' : 'Artist'}
+                            </p>
                         </div>
                     </div>
                     <button
