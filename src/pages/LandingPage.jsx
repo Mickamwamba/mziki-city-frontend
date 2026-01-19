@@ -98,7 +98,8 @@ const LandingPage = () => {
                     </h1>
                     <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
                         {/* Take your music to every corner of the world, quickly and flawlessly. Take control of the entire process from start to finish. */}
-                        Push your music into all global markets with speed and accuracy. Hold complete oversight of the whole release cycle.
+                        {/* Push your music into all global markets with speed and accuracy. Hold complete oversight of the whole release cycle. */}
+                        A Financial-Powered Music Distribution Platform Turning Royalties Into Wealth.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                         <Link to="/signup" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-full font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-center">
