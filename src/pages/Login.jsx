@@ -30,7 +30,7 @@ const Login = () => {
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-block">
-                        <img src="/src/assets/logo.jpg" alt="Mziki City Logo" className="w-12 h-12 rounded-xl object-cover mx-auto mb-4" />
+                        <img src="/src/assets/logo.jpg" alt="TunePesa" className="w-40 h-auto rounded-xl object-contain mx-auto mb-6" />
                     </Link>
                     <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
                     <p className="text-gray-400">Sign in to manage your music distribution</p>

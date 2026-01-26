@@ -21,8 +21,7 @@ const Pricing = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
                         <Link to="/" className="flex items-center space-x-2">
-                            <img src="/src/assets/logo.jpg" alt="Mziki City Logo" className="w-8 h-8 rounded-lg object-cover" />
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Mziki City</span>
+                            <img src="/src/assets/logo.jpg" alt="TunePesa" className="h-14 w-auto rounded-lg object-contain" />
                         </Link>
                         <div className="flex items-center space-x-6">
                             <Link to="/pricing" className="text-white font-medium transition-colors">Pricing</Link>
@@ -128,11 +127,10 @@ const Pricing = () => {
             <footer className="bg-slate-950 border-t border-slate-900 py-12 px-4 sm:px-6 lg:px-8 mt-20">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
                     <div className="flex items-center space-x-2 mb-4 md:mb-0">
-                        <Music className="w-6 h-6 text-gray-600" />
-                        <span className="text-lg font-bold text-gray-500">Mziki City</span>
+                        <img src="/src/assets/logo.jpg" alt="TunePesa" className="h-10 w-auto grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300" />
                     </div>
                     <div className="text-gray-600 text-sm">
-                        &copy; {new Date().getFullYear()} Mziki City. All rights reserved.
+                        &copy; {new Date().getFullYear()} TunePesa. All rights reserved.
                     </div>
                 </div>
             </footer>

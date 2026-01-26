@@ -34,10 +34,7 @@ const Layout = ({ children }) => {
             {/* Sidebar */}
             <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
                 <div className="p-6 flex items-center space-x-2">
-                    <img src="/src/assets/logo.jpg" alt="Mziki City Logo" className="w-8 h-8 rounded-lg object-cover" />
-                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                        Mziki City
-                    </span>
+                    <img src="/src/assets/logo.jpg" alt="TunePesa" className="w-56 h-auto rounded-lg object-contain" />
                 </div>
 
                 <nav className="flex-1 px-4 space-y-2 mt-4">

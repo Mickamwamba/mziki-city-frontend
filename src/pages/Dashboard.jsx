@@ -64,7 +64,7 @@ const Dashboard = () => {
         if (!data) return;
 
         const date = new Date().toLocaleDateString();
-        let csvContent = `Mziki City Analytics Report - ${date} \n\n`;
+        let csvContent = `TunePesa Analytics Report - ${date} \n\n`;
 
         // Section 1: Summary
         csvContent += `SUMMARY\n`;
@@ -99,7 +99,7 @@ const Dashboard = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.setAttribute('href', url);
-        link.setAttribute('download', `mziki_city_report_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute('download', `tunepesa_report_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
