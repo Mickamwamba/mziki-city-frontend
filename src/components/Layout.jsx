@@ -32,7 +32,7 @@ const Layout = ({ children }) => {
     return (
         <div className="flex h-screen bg-dark text-gray-100 font-sans">
             {/* Sidebar */}
-            <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
+            <aside className="w-64 bg-dark border-r border-white/5 flex flex-col">
                 <div className="p-6 flex items-center space-x-2">
                     <img src="/src/assets/logo.jpg" alt="TunePesa" className="w-56 h-auto rounded-lg object-contain" />
                 </div>
@@ -46,8 +46,8 @@ const Layout = ({ children }) => {
                                 key={item.path}
                                 to={item.path}
                                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                                    ? 'bg-primary/10 text-primary'
-                                    : 'text-gray-400 hover:bg-slate-800 hover:text-white'
+                                    ? 'bg-primary/10 text-primary border border-primary/20'
+                                    : 'text-gray-400 hover:bg-white/5 hover:text-white border border-transparent'
                                     }`}
                             >
                                 <Icon className="w-5 h-5" />
@@ -57,9 +57,9 @@ const Layout = ({ children }) => {
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-slate-800">
+                <div className="p-4 border-t border-white/5">
                     <div className="flex items-center space-x-3 px-4 py-3 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold">
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold">
                             {user?.username?.[0]?.toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">

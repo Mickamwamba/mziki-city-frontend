@@ -67,9 +67,9 @@ const LandingPage = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white font-sans">
+        <div className="min-h-screen bg-dark text-white font-sans">
             {/* Navigation */}
-            <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md fixed w-full z-50">
+            <nav className="border-b border-white/5 bg-dark/80 backdrop-blur-md fixed w-full z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
                         <div className="flex items-center space-x-2">
@@ -109,7 +109,7 @@ const LandingPage = () => {
             </section>
 
             {/* Distributors Section */}
-            <section className="py-20 bg-slate-900/50 border-y border-slate-800">
+            <section className="py-20 bg-white/5 border-y border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <p className="text-center text-gray-500 font-medium mb-12 uppercase tracking-widest text-sm">Trusted by major platforms</p>
                     <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-center">
@@ -139,8 +139,8 @@ const LandingPage = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
                         {features.map((feature, index) => (
-                            <div key={index} className="bg-slate-900 border border-slate-800 p-8 rounded-3xl hover:border-primary/30 transition-colors group">
-                                <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:text-primary transition-colors">
+                            <div key={index} className="bg-white/5 border border-white/10 p-8 rounded-3xl hover:border-primary/30 transition-colors group">
+                                <div className="w-12 h-12 bg-black/40 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:text-primary transition-colors">
                                     <feature.icon className="w-6 h-6" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
@@ -152,21 +152,21 @@ const LandingPage = () => {
             </section>
 
             {/* FAQ Section */}
-            <section className="py-24 bg-slate-900/30 px-4 sm:px-6 lg:px-8">
+            <section className="py-24 bg-black/20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-3xl mx-auto">
                     <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
                     <div className="space-y-4">
                         {faqs.map((faq, index) => (
-                            <div key={index} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+                            <div key={index} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
                                 <button
                                     onClick={() => toggleFaq(index)}
-                                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-slate-800/50 transition-colors"
+                                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-white/10 transition-colors"
                                 >
                                     <span className="font-medium text-lg">{faq.question}</span>
                                     {openFaq === index ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                                 </button>
                                 {openFaq === index && (
-                                    <div className="px-6 pb-6 text-gray-400 leading-relaxed border-t border-slate-800/50 pt-4">
+                                    <div className="px-6 pb-6 text-gray-400 leading-relaxed border-t border-white/5 pt-4">
                                         {faq.answer}
                                     </div>
                                 )}
@@ -177,7 +177,7 @@ const LandingPage = () => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-slate-950 border-t border-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+            <footer className="bg-dark border-t border-white/5 py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
                     <div className="flex items-center space-x-2 mb-4 md:mb-0">
                         <img src="/src/assets/logo.jpg" alt="TunePesa" className="h-10 w-auto grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300" />

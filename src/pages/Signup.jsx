@@ -74,7 +74,7 @@ const Signup = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 font-sans">
+        <div className="min-h-screen bg-dark flex items-center justify-center p-4 font-sans">
             <div className="w-full max-w-2xl">
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-block">
@@ -84,7 +84,7 @@ const Signup = () => {
                     <p className="text-gray-400">Join thousands of independent artists</p>
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl">
+                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl backdrop-blur-sm">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
                             <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center">
@@ -100,7 +100,7 @@ const Signup = () => {
                                     name="first_name"
                                     value={formData.first_name}
                                     onChange={handleChange}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     required
                                 />
                             </div>
@@ -111,7 +111,7 @@ const Signup = () => {
                                     name="last_name"
                                     value={formData.last_name}
                                     onChange={handleChange}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     required
                                 />
                             </div>
@@ -123,7 +123,7 @@ const Signup = () => {
                                 <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, is_label: false, is_artist: true })}
-                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center transition-all ${!formData.is_label ? 'bg-primary/20 border-primary text-white' : 'bg-slate-800 border-slate-700 text-gray-400 hover:bg-slate-750'}`}
+                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center transition-all ${!formData.is_label ? 'bg-primary/20 border-primary text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                                 >
                                     <Music className="w-6 h-6 mb-2" />
                                     <span className="font-bold">Artist</span>
@@ -131,7 +131,7 @@ const Signup = () => {
                                 <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, is_label: true, is_artist: false })}
-                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center transition-all ${formData.is_label ? 'bg-primary/20 border-primary text-white' : 'bg-slate-800 border-slate-700 text-gray-400 hover:bg-slate-750'}`}
+                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center transition-all ${formData.is_label ? 'bg-primary/20 border-primary text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                                 >
                                     <div className="w-6 h-6 mb-2 flex items-center justify-center font-bold border-2 border-current rounded-md text-xs">LB</div>
                                     <span className="font-bold">Label</span>
@@ -149,7 +149,7 @@ const Signup = () => {
                                     name={formData.is_label ? 'label_name' : 'artist_name'}
                                     value={formData.is_label ? formData.label_name : formData.artist_name}
                                     onChange={handleChange}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     required
                                 />
                             </div>
@@ -160,7 +160,7 @@ const Signup = () => {
                                     name="phone_number"
                                     value={formData.phone_number}
                                     onChange={handleChange}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     required
                                 />
                             </div>
@@ -186,7 +186,7 @@ const Signup = () => {
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     required
                                 />
                             </div>
@@ -197,7 +197,7 @@ const Signup = () => {
                                     name="confirm_password"
                                     value={formData.confirm_password}
                                     onChange={handleChange}
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                                     required
                                 />
                             </div>
